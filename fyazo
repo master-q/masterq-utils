@@ -6,6 +6,7 @@ CAPTURE_CMD="import"
 FLICKR_CMD="flickcurl"
 TMPFILE="/tmp/fyazo_upload$$.png"
 TITLE="fyazo`date +%Y%m%d%H%M%S`"
+TAG="fyazo"
 
 # function
 command_installed () {
@@ -28,10 +29,23 @@ if test -f $TMPFILE; then :; else
 fi
 
 # upload
-if $FLICKR_CMD upload $TMPFILE title $TITLE; then :; else
-    echo "*** $FLICKR_CMD error."
-    # FALLTHROUGH
-fi
+PHOTOID=`$FLICKR_CMD upload $TMPFILE title $TITLE tags $TAG 2>&1 | tail -n 1 | sed -e "s/^.*Photo ID: \(.*$\)$/\1/"`
+echo Photo ID: $PHOTOID
 
 # cleanup
 rm -f $TMPFILE
+
+# open with web browser
+if test -z "$PHOTOID"; then
+    echo "*** $FLICKR_CMD upload error."
+    exit 3
+fi
+
+SHORTURI=`$FLICKR_CMD shorturi $PHOTOID 2>&1 | sed -e "s/^.*\(http.*$\)$/\1/"`
+echo URL: $SHORTURI
+
+if test -z "$SHORTURI"; then
+    echo "*** $FLICKR_CMD get shorturi error."
+    exit 4
+fi
+$BROWSER_CMD $SHORTURI

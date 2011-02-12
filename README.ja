@@ -1,0 +1,33 @@
+= 各コマンドの説明
+
+== fyazo
+
+http://gyazo.com/ みたいな奴。
+
+* flickcurlコマンド http://librdf.org/flickcurl/
+* imagemagickのimportコマンド
+
+が必要。Debianなら
+
+  sudo apt-get install imagemagick flickcurl-utils
+
+でOK。
+
+  1. Visit http://www.flickr.com/services/api/keys/ and obtain a
+  mobile application <API Key>, <Shared Secret> and <Authentication URL>.
+  
+  2. Create /home/kiwamu/.flickcurl.conf in this format:
+  [flickr]
+  api_key=<API Key>
+  secret=<Shared Secret>
+  
+  3. Visit the <Authentication URL> in a browser to get a <FROB>
+  
+  4. Call this program with the frob:
+    flickcurl -a <FROB>
+  to update the configuration file with the authentication token.
+  See http://librdf.org/flickcurl/api/flickcurl-auth.html for full instructions.
+
+ってな手順で.flickcurl.confを設定する。
+その後、fyazoとコマンドがgyazoと同じように使える。
+
