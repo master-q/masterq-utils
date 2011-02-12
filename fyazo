@@ -1,0 +1,37 @@
+#!/bin/sh
+
+# env
+BROWSER_CMD="x-www-browser"
+CAPTURE_CMD="import"
+FLICKR_CMD="flickcurl"
+TMPFILE="/tmp/fyazo_upload$$.png"
+TITLE="fyazo`date +%Y%m%d%H%M%S`"
+
+# function
+command_installed () {
+    if which $1 >/dev/null 2>&1; then :; else
+	echo "*** not found \"$1\" command."
+	exit 1
+    fi
+}
+
+# command installed?
+command_installed $BROWSER_CMD
+command_installed $CAPTURE_CMD
+command_installed $FLICKR_CMD
+
+# capture
+$CAPTURE_CMD $TMPFILE
+if test -f $TMPFILE; then :; else
+    echo "*** can't capture with \"$CAPTURE_CMD\" command."
+    exit 2
+fi
+
+# upload
+if $FLICKR_CMD upload $TMPFILE title $TITLE; then :; else
+    echo "*** $FLICKR_CMD error."
+    # FALLTHROUGH
+fi
+
+# cleanup
+rm -f $TMPFILE
