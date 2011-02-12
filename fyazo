@@ -16,10 +16,14 @@ command_installed () {
     fi
 }
 
-# command installed?
+# command check
 command_installed $BROWSER_CMD
 command_installed $CAPTURE_CMD
 command_installed $FLICKR_CMD
+if $FLICKR_CMD test.login > /dev/null 2>&1; then :; else
+    echo "*** should setup \".flickcurl.conf\"."
+    exit 1
+fi
 
 # capture
 $CAPTURE_CMD $TMPFILE
