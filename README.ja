@@ -29,5 +29,6 @@ http://gyazo.com/ みたいな奴。
   See http://librdf.org/flickcurl/api/flickcurl-auth.html for full instructions.
 
 ってな手順で.flickcurl.confを設定する。
-その後、fyazoとコマンドがgyazoと同じように使える。
+flickcurl設定方法は http://d.masterq.net/?date=20110212#p04 とかに書いた。
 
+その後、fyazoとコマンドがgyazoと同じように使える。
