@@ -1,0 +1,1 @@
+env LD_PRELOAD=/home/kiwamu/src/linusmemcpy/linusmemcpy.so /usr/bin/chromium
