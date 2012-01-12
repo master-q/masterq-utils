@@ -1,0 +1,84 @@
+#!/usr/bin/env gosh
+
+(use chaton.client)
+(use gauche.logger)
+(use gauche.parameter)
+(use gauche.parseopt)
+(use gauche.process)
+(use gauche.threads)
+(use util.list)
+(use util.match)
+
+(define-class <chaton-config> ()
+   ((client   :init-keyword :client
+              :accessor client-of :init-value #f)
+    (url      :init-keyword :url
+              :accessor url-of :init-value #f)
+    (npath    :init-keyword :npath
+              :accessor npath-of :init-value #f)
+    (ipath    :init-keyword :ipath
+              :accessor ipath-of :init-value #f)
+    (priority :init-keyword :priority
+              :accessor priority-of :init-value 0)
+    (logpath  :init-keyword :logpath
+              :accessor logpath-of :init-value #f)))
+
+(define *chaton-config*
+  (make-parameter
+   (make <chaton-config> :client "ChatonRadar"
+         :url "http://practical-scheme.net/chaton/haskell-ja"
+         :npath "/usr/bin/notify-send"
+         :ipath "/home/kiwamu/src/masterq-utils/chaton-room-haskell.png")))
+
+(define (send-notify npath ipath title message)
+  (process-output->string
+   (list npath "--image" ipath "-p" (priority-of (*chaton-config*)) "-t" title "-m" message)))
+
+(define (radar-handler response)
+  (cond [(pair? response)
+         (let1 content (assoc-ref response 'content)
+           (match content [((name (sec mil) body) ... )
+                           (for-each (cut send-notify
+                                          (npath-of (*chaton-config*))
+                                          (ipath-of (*chaton-config*)) <> <>)
+                                     name body)]))]
+        [(is-a? response <chaton-error>)
+         (begin
+           (log-format "room-url: ~s" (ref condition 'room-url))
+           (log-format "message: ~s" (ref condinion 'message)))])
+  #f)
+
+(define (show-help progname)
+  (print #`",|progname| [-c conf-file]"))
+
+(define (read-config cfile)
+  (let* ((sx (and cfile (call-with-input-file cfile (cut read <>))))
+         (url (and sx (assoc-ref sx 'url)))
+         (npath (and sx (assoc-ref sx 'npath)))
+         (ipath (and sx (assoc-ref sx 'ipath)))
+         (prior (and sx (assoc-ref sx 'priority)))
+         (lpath (and sx (assoc-ref sx 'logpath)))
+         (conf (*chaton-config*)))
+    (when url (set! (url-of conf) url))
+    (when npath (set! (npath-of conf) npath))
+    (when ipath (set! (ipath-of conf) ipath))
+    (when prior (set! (priority-of conf) prior))
+    (when lpath (set! (logpath-of conf) lpath))
+    (*chaton-config* conf)))
+
+(define (main args)
+  (let-args (cdr args)
+      ((cfile "c|conf=s" => (cut read-config <>))
+       (help  "h|help" => (cut show-help <>)))
+    (send-notify (npath-of (*chaton-config*)) 
+                 (ipath-of (*chaton-config*)) 
+                 (client-of (*chaton-config*)) "Radar Start")
+    ((with-module chaton.client chaton-log-open)
+     (logpath-of (*chaton-config*)))
+    (let1 client (chaton-connect
+                  (url-of (*chaton-config*))
+                  (client-of (*chaton-config*))
+                  radar-handler)
+      (guard (e (else (log-format "error: ~s" e)
+                      (log-format "reason: ~s" (ref e 'reason))))
+             (thread-join! (ref client 'observer-thread))))))

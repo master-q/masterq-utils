@@ -46,7 +46,7 @@ if test -z "$PHOTOID"; then
     exit 3
 fi
 
-SHORTURI=`$FLICKR_CMD shorturi $PHOTOID 2>&1 | sed -e "s/^.*\(http.*$\)$/\1/"`
+SHORTURI=`$FLICKR_CMD shorturi $PHOTOID 2>&1 | tail -1 | sed -e "s/^.*\(http:\/\/flic.kr.*\)$/\1/"`
 echo URL: $SHORTURI
 
 if test -z "$SHORTURI"; then
