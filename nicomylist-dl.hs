@@ -7,12 +7,6 @@ import Text.Parsec
 import Text.Parsec.String
 import System.Environment
 import Control.Monad
-import qualified Data.Aeson as A
-import qualified Data.Aeson.Types as AT
-import qualified Data.ByteString as B
-import qualified Data.ByteString.Char8 as BC8
-import qualified Data.ByteString.Lazy as BL
-import qualified Data.ByteString.Lazy.Char8 as BLC8
 
 data NicoItem = NicoItem {
   item_id :: Integer
@@ -38,3 +32,6 @@ main = do
   result <- parseFromFile parseMylistPreload $ head args
   let result' = stripParsedR result
   putStrLn result'
+
+-- nicomylist-dl.hs top.html | aeson-pretty | grep watch_id |sed -e 's/.*\"watch_id\": \"/http:\/\/www.nicovideo.jp\/watch\//g'|sed -e 's/",//g' > tmp.list
+-- for i in `cat tmp.list`; do nicovideo-dl -u xxx -p yyy $i; done
