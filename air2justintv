@@ -18,7 +18,7 @@ usage () {
 try_air () {
     date
     padsp ffmpeg -f video4linux2 -pix_fmt bgra -s "$VIDEO_SIZE" -r "$FPS" \
-	-i /dev/video0 \
+	-i $DEV_VIDEO \
 	-f alsa -ac 1 -ar 11025 -i pulse \
 	-vcodec libx264 -coder 0 -bf 0 \
 	-acodec libmp3lame -ab 32k \
