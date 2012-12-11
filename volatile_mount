@@ -1,0 +1,72 @@
+#!/bin/sh
+
+VOLDIR=/tmp/volatile_mount/volatile
+MNTDIR=/tmp/volatile_mount/mnt
+
+usage () {
+    echo "Usage: volatile_mount FROM_DIR MOUNT_NAME"
+    exit 1
+
+}
+
+if [ "$1" = "" ] ; then
+    usage
+fi
+
+OPTIONS=`getopt -o luh -n "$0" -- "$@"`
+# Check for non-GNU getopt
+if [ $? != 0 ] ; then echo "W: non-GNU getopt" >&2 ; exit 1 ; fi
+eval set -- "$OPTIONS"
+
+OPT_L=false
+OPT_U=false
+
+while true; do
+    case "$1" in
+	-l)
+            OPT_L=true
+            shift
+            ;;
+	-u)
+	    OPT_U=true
+	    shift
+            ;;
+	-h)
+	    usage
+	    exit 1
+	    ;;
+	--)
+            shift
+            break
+            ;;
+	*)
+            echo "Internal error!" >&2
+            exit 1
+            ;;
+    esac
+done
+
+if $OPT_L; then
+    echo == mounted ==
+    mount | grep $MNTDIR
+    echo == volatile dirs ==
+    LIST_VOLDIR=`ls -d $VOLDIR/* 2>/dev/null`
+    if [ "$LIST_VOLDIR" != "" ]; then
+	echo $LIST_VOLDIR
+    fi
+elif $OPT_U; then
+    echo "unmount?"
+else
+    FROM_DIR=`realpath $1`
+    MOUNT_NAME=$2
+    if [ "$FROM_DIR" != "" ] && [ -e $FROM_DIR ] && [ "$MOUNT_NAME" != "" ]; then
+	:
+    else
+	usage
+    fi
+    FROM_DIR_REP=`echo $FROM_DIR | sed -e "s/\//_/g"`
+
+    mkdir -p $VOLDIR/$FROM_DIR_REP
+    mkdir -p $MNTDIR/$MOUNT_NAME
+    sudo mount -t aufs -o br:$VOLDIR/$FROM_DIR_REP=rw:$FROM_DIR=ro none $MNTDIR/$MOUNT_NAME
+fi
