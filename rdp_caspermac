@@ -1,0 +1,2 @@
+#!/bin/sh
+rdesktop -5 -g 1024x748 -a 24 -k ja -K -T Remotedesktop-Client: localhost:3391
