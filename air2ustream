@@ -1,0 +1,38 @@
+#!/bin/sh
+
+. $HOME/.air2ustream
+
+DEV_VIDEO=$1
+VIDEO_SIZE="320x240"
+FPS="15"
+
+usage () {
+    echo "Usage: air2ustream /dev/video*"
+    exit 1
+
+}
+
+try_air () {
+    date
+    padsp ffmpeg -f video4linux2 -pix_fmt bgra -s "$VIDEO_SIZE" -r "$FPS" \
+	-i $DEV_VIDEO \
+	-f alsa -ac 1 -ar 11025 -i pulse \
+	-vcodec libx264 -coder 0 -bf 0 \
+	-acodec libmp3lame -ab 32k \
+	-threads 0 \
+	-f flv ${STREAM_URL}/${STREAM_KEY} #> /dev/null 2>&1
+    notify-send "ffmpeg disconnected..."
+}
+
+if [ "$DEV_VIDEO" != "" ] && [ -e $DEV_VIDEO ]; then
+    :
+else
+    usage
+fi
+
+while true; do
+    try_air
+    echo "sleep 3sec, because ffmpeg disconnected..."
+    sleep 3
+    echo "retry ffmpeg"
+done
