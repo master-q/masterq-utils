@@ -26,7 +26,7 @@ if $FLICKR_CMD test.login > /dev/null 2>&1; then :; else
 fi
 
 # capture
-sleep 3
+sleep 1
 $CAPTURE_CMD $TMPFILE
 if test -f $TMPFILE; then :; else
     echo "*** can't capture with \"$CAPTURE_CMD\" command."
