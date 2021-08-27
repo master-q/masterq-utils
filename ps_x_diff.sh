@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # NAME: ps_x_diff.sh
-# DESCRIPTION: Monitor user process's CPU assignment changing per second
+# DESCRIPTION: Monitor changing of user process's CPU assignment per second
 # LICENSE: public domain
 
 function do_ps() {
