@@ -1,5 +1,8 @@
 #!/bin/bash
 
+echo "*** This script break your CDN URL (staticflickr.com)!"
+exit 1
+
 if [ "$#" != "1" ]; then
     echo "Usage: $0 USERNAME"
     exit 1
